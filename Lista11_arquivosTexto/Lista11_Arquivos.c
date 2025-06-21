@@ -314,9 +314,134 @@ int word_frequency(const char* filepath, const char* word){
     return cont;
 }
 
+typedef struct{
+    char palavra[100];
+    int contagem;
+} Palavra;
+
 int words_report(const char* filepath, const char* word){
-    
+    FILE* file = fopen(filepath, "r");
+    if(file == NULL) return 0;
+
+    //vetor com structs palavras
+    Palavra palavras[1000];
+    int total = 0;
+    char buffer[100];
+
+    while(fscanf(file, "%99s", buffer) == 1){
+        char limpa[100];
+        int j = 0;
+        for(int i = 0; buffer[i] != '\0'; i++){
+            if(isalpha(buffer[i])){
+                limpa[j++] = tolower(buffer[i]);
+            }
+        }
+        limpa[j] = '\0';
+
+        if(j == 0) continue;
+
+        int encontrada = 0;
+        for(int i = 0; i < total; i++){
+            if(strcmp(palavras[i].palavra, limpa) == 0){
+                palavras[i].contagem++;
+                encontrada = 1;
+                break;
+            }
+        }
+
+        if(!encontrada){
+            strcpy(palavras[total].palavra, limpa);
+            palavras[total].contagem = 1;
+            total++;
+        }
+    }
+
+    fclose(file);
+
+    for(int i = 0; i < total; i++){
+        printf("%s: %d\n", palavras[i].palavra, palavras[i].contagem);
+    }
+    return 1;
 }
+
+int cont_letters(const char* word){
+    int letras = 0;
+    for(int i = 0; word[i] != 0; i++){
+        if(isalpha(word[i])){
+            letras++;
+        }
+    }
+    return letras;
+}
+
+char* get_longest(const char *filepath){
+    FILE* file = fopen(filepath, "r");
+
+    if(file == NULL) return NULL;
+
+    int max_tam = 0;
+    char buffer[100];
+    char limpa[100];
+    char strMaior[100];
+
+    while(fscanf(file, "%99s", buffer) == 1){
+        int j = 0;
+        for(int i = 0; buffer[i] != 0; i++){
+            if(isalpha(buffer[i])){
+                limpa[j++] = buffer[i];
+            }
+        }
+        limpa[j]='\0';
+
+        int tam = cont_letters(limpa);
+
+        if(tam > max_tam){
+            max_tam = tam;
+            strcpy(strMaior, limpa);
+        }
+    }
+
+    char* strMax = malloc((max_tam+1) * sizeof(char));
+    strcpy(strMax, strMaior);
+    return strMax;
+}
+
+int replace_word(const char* filepath, const char* old, const char* new){
+    FILE* file = fopen(filepath, "r");
+
+    if(file == NULL) return 0;
+    int mudancas = 0;
+
+    char* result = malloc(10000 * sizeof(char));
+
+    result[0] = '\0';
+    char buffer[100];
+
+    while(fscanf(file, "%99s", buffer) == 1){
+        if(strcmp(buffer, old) == 0){
+            strcat(result, new);
+            mudancas++;
+        } else{
+            strcat(result, buffer);
+        }
+        strcat(result, " ");
+    }
+
+    fclose(file);
+
+    file  = fopen(filepath, "w");
+
+    if(file == NULL){
+        free(result);
+        return -1;
+    }
+
+    fputs(result, file);
+    fclose(file);
+    free(result);
+    return mudancas;
+}
+
 
 int main(){
     int e = 0;
@@ -410,6 +535,21 @@ int main(){
             char word[51] = "papapa";
             int n = word_frequency("dados.txt", word);
             printf("A palavra se repete %d vezes", n);
+            break;
+        }
+        case 15:{
+            char word[51] = "papapa";
+            words_report("dados.txt", word);
+            break;
+        }
+        case 16:{
+            char* str = get_longest("dados.txt");
+            printf("%s", str);
+            break;
+        }
+        case 17:{
+            int mudancas = replace_word("dados.txt", "pipipi", "papapa");
+            printf("%d", mudancas);
             break;
         }
         default:
