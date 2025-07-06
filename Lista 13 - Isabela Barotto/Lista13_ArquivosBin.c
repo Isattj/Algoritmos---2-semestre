@@ -37,7 +37,6 @@ int* read_array(const char* filepath, int* n){
 
 void write_all_movies(const char* filepath, const Movie* list, int n){
     FILE* file = fopen(filepath, "wb");
-
     fwrite(list, sizeof(Movie), n, file);
 }
 

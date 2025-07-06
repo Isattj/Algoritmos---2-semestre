@@ -135,8 +135,8 @@ char* get_content(const char *filepath){
 
 int find(FILE* file, const char* ch, int whence){
     int posicao = whence;
-    
     fseek(file, whence, SEEK_SET);
+    
     char c = fgetc(file);
     while(c != EOF){
         for(int i = 0; *(ch + i) != 0; i++){
